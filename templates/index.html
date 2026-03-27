@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CivicFix AI — Municipal Intelligence Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0a0a;
+  --paper: #f5f2eb;
+  --accent: #e8440a;
+  --accent2: #1a3a2a;
+  --muted: #6b6860;
+  --card: #ffffff;
+  --border: #ddd9d0;
+  --critical: #e8440a;
+  --high: #e07b00;
+  --medium: #c9a800;
+  --low: #2d7a4f;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 48px;
+  background: rgba(245,242,235,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 20px; letter-spacing: -0.5px;
+}
+.logo span { color: var(--accent); }
+nav a {
+  font-size: 14px; font-weight: 500; color: var(--muted);
+  text-decoration: none; transition: color .2s;
+}
+nav a:hover { color: var(--ink); }
+.nav-links { display: flex; gap: 32px; align-items: center; }
+.btn-nav {
+  background: var(--ink); color: var(--paper) !important;
+  padding: 10px 22px; border-radius: 6px; font-size: 14px !important;
+  transition: background .2s !important;
+}
+.btn-nav:hover { background: var(--accent) !important; color: #fff !important; }
+
+/* HERO */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 120px 48px 80px;
+  position: relative; overflow: hidden;
+}
+.hero-grid {
+  position: absolute; inset: 0; opacity: .04;
+  background-image: linear-gradient(var(--ink) 1px, transparent 1px),
+                    linear-gradient(90deg, var(--ink) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent2); color: #a8d5b5;
+  font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 100px; margin-bottom: 32px;
+  animation: fadeUp .6s ease both;
+}
+.hero-tag::before {
+  content: ''; width: 6px; height: 6px;
+  background: #4ade80; border-radius: 50%;
+  box-shadow: 0 0 6px #4ade80;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(48px, 7vw, 96px);
+  font-weight: 800; line-height: .95;
+  letter-spacing: -3px;
+  animation: fadeUp .7s .1s ease both;
+}
+h1 em { font-style: normal; color: var(--accent); }
+.hero-sub {
+  max-width: 520px;
+  margin-top: 28px;
+  font-size: 18px; font-weight: 300; line-height: 1.6; color: var(--muted);
+  animation: fadeUp .7s .2s ease both;
+}
+.hero-actions {
+  display: flex; gap: 16px; margin-top: 48px; flex-wrap: wrap;
+  animation: fadeUp .7s .3s ease both;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--accent); color: #fff;
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px;
+  padding: 16px 32px; border-radius: 8px; text-decoration: none;
+  transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 20px rgba(232,68,10,.3);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,68,10,.4); }
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: transparent; color: var(--ink);
+  font-family: 'Syne', sans-serif; font-weight: 600; font-size: 15px;
+  padding: 16px 32px; border-radius: 8px; text-decoration: none;
+  border: 1.5px solid var(--border);
+  transition: border-color .2s, background .2s;
+}
+.btn-secondary:hover { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.arrow { font-size: 18px; transition: transform .2s; }
+.btn-primary:hover .arrow { transform: translateX(4px); }
+
+/* STATS TICKER */
+.stats-bar {
+  background: var(--ink); color: var(--paper);
+  padding: 20px 48px;
+  display: flex; gap: 64px; justify-content: center; flex-wrap: wrap;
+  animation: fadeUp .7s .4s ease both;
+}
+.stat-item { text-align: center; }
+.stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px; font-weight: 800; color: var(--accent);
+}
+.stat-label { font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #888; margin-top: 2px; }
+
+/* FEATURES */
+.section { padding: 100px 48px; }
+.section-tag {
+  font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px, 4vw, 52px); font-weight: 800;
+  letter-spacing: -2px; line-height: 1.1;
+  margin-bottom: 64px;
+}
+
+.features-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2px;
+}
+.feature-card {
+  background: var(--card); padding: 40px 36px;
+  border: 1px solid var(--border);
+  transition: transform .3s, box-shadow .3s;
+  cursor: default;
+}
+.feature-card:first-child { border-radius: 12px 0 0 12px; }
+.feature-card:last-child  { border-radius: 0 12px 12px 0; }
+.feature-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,.1); z-index: 1; }
+.feature-icon {
+  width: 48px; height: 48px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; margin-bottom: 20px;
+}
+.icon-red  { background: #fde8e2; }
+.icon-green{ background: #e2f4ea; }
+.icon-blue { background: #e2ecfd; }
+.icon-amber{ background: #fdf3e2; }
+.feature-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 700; margin-bottom: 10px;
+}
+.feature-desc { font-size: 14px; line-height: 1.65; color: var(--muted); }
+
+/* FLOW */
+.flow-section { background: var(--ink); padding: 100px 48px; }
+.flow-section .section-tag { color: #4ade80; }
+.flow-section .section-title { color: var(--paper); }
+.flow-steps {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0; position: relative;
+}
+.flow-step {
+  padding: 32px; border-left: 1px solid #333;
+  position: relative;
+}
+.flow-step:first-child { border-left: none; }
+.step-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 48px; font-weight: 800; color: #222;
+  line-height: 1; margin-bottom: 16px;
+}
+.step-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 700; color: var(--paper); margin-bottom: 8px;
+}
+.step-desc { font-size: 13px; color: #888; line-height: 1.6; }
+.step-badge {
+  display: inline-block; margin-top: 12px;
+  font-size: 11px; font-weight: 500; letter-spacing: 1px;
+  padding: 4px 10px; border-radius: 100px;
+}
+.badge-red   { background: rgba(232,68,10,.2); color: #f97316; }
+.badge-green { background: rgba(74,222,128,.15); color: #4ade80; }
+.badge-blue  { background: rgba(96,165,250,.15); color: #60a5fa; }
+
+/* ROLES */
+.roles-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px;
+}
+.role-card {
+  border: 1.5px solid var(--border); border-radius: 12px; padding: 32px 28px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.role-card:hover { border-color: var(--accent); box-shadow: 0 8px 40px rgba(232,68,10,.1); }
+.role-emoji { font-size: 32px; margin-bottom: 16px; }
+.role-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 700; margin-bottom: 8px;
+}
+.role-list { list-style: none; }
+.role-list li {
+  font-size: 13px; color: var(--muted); padding: 5px 0;
+  border-bottom: 1px solid var(--border); line-height: 1.5;
+}
+.role-list li:last-child { border-bottom: none; }
+.role-list li::before { content: '→ '; color: var(--accent); font-weight: 600; }
+
+/* CTA */
+.cta-section {
+  background: var(--accent); padding: 100px 48px; text-align: center;
+}
+.cta-section h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(36px,5vw,64px); font-weight: 800;
+  color: #fff; letter-spacing: -2px; margin-bottom: 24px;
+}
+.cta-section p { color: rgba(255,255,255,.8); font-size: 18px; margin-bottom: 40px; }
+.btn-white {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #fff; color: var(--accent);
+  font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px;
+  padding: 18px 40px; border-radius: 8px; text-decoration: none;
+  transition: transform .2s; margin: 8px;
+}
+.btn-white:hover { transform: translateY(-2px); }
+.btn-outline-white {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: transparent; color: #fff;
+  font-family: 'Syne', sans-serif; font-weight: 600; font-size: 16px;
+  padding: 17px 40px; border-radius: 8px; text-decoration: none;
+  border: 2px solid rgba(255,255,255,.5);
+  transition: border-color .2s, background .2s; margin: 8px;
+}
+.btn-outline-white:hover { border-color: #fff; background: rgba(255,255,255,.1); }
+
+footer {
+  background: var(--ink); color: #555; text-align: center;
+  padding: 32px 48px; font-size: 13px;
+}
+footer strong { color: var(--paper); }
+
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(24px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Civic<span>Fix</span> AI</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#roles">For teams</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/report" class="btn-nav">Report Issue</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-tag">AI-Powered Municipal Intelligence</div>
+  <h1>Turn complaints<br>into <em>action.</em></h1>
+  <p class="hero-sub">CivicFix AI converts geolocated citizen reports into prioritised, deduplicated municipal incidents — giving operations teams, analysts, and decision-makers a single intelligent view of city faults.</p>
+  <div class="hero-actions">
+    <a href="/report" class="btn-primary">Report an issue <span class="arrow">→</span></a>
+    <a href="/dashboard" class="btn-secondary">View dashboard</a>
+  </div>
+</section>
+
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num">96K+</div><div class="stat-label">Potholes per year</div></div>
+  <div class="stat-item"><div class="stat-num">24%</div><div class="stat-label">Physical water loss</div></div>
+  <div class="stat-item"><div class="stat-num">1000+</div><div class="stat-label">Daily service requests</div></div>
+  <div class="stat-item"><div class="stat-num">4x</div><div class="stat-label">Faster triage with AI</div></div>
+</div>
+
+<section class="section" id="features">
+  <div class="section-tag">Core capabilities</div>
+  <div class="section-title">Everything a municipality needs<br>to respond faster.</div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon icon-red">📍</div>
+      <div class="feature-title">Location-aware reporting</div>
+      <div class="feature-desc">Citizens report faults with automatic GPS capture. Every incident is pinned to a precise location for accurate field dispatch.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-blue">🤖</div>
+      <div class="feature-title">AI classification</div>
+      <div class="feature-desc">Descriptions are instantly classified into issue types, routed to the correct department, and assigned a priority level — no manual triage.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-green">🔗</div>
+      <div class="feature-title">Duplicate clustering</div>
+      <div class="feature-desc">Reports within 150m of an existing open incident are automatically grouped. More reports = higher priority signal, not more noise.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon icon-amber">📊</div>
+      <div class="feature-title">Decision dashboards</div>
+      <div class="feature-desc">Analysts see hotspots and trends. Decision-makers see priority actions. Operations see a clean incident queue — all from one platform.</div>
+    </div>
+  </div>
+</section>
+
+<section class="flow-section" id="how">
+  <div class="section-tag">How it works</div>
+  <div class="section-title">From report to resolution.</div>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="step-num">01</div>
+      <div class="step-title">Citizen reports</div>
+      <div class="step-desc">User describes the fault, uploads a photo, and location is auto-captured.</div>
+      <span class="step-badge badge-blue">30 seconds</span>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">02</div>
+      <div class="step-title">AI classifies</div>
+      <div class="step-desc">System identifies issue type, assigns department, scores priority.</div>
+      <span class="step-badge badge-green">Instant</span>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">03</div>
+      <div class="step-title">Duplicates detected</div>
+      <div class="step-desc">Nearby matching incidents are clustered. Each new report boosts urgency.</div>
+      <span class="step-badge badge-green">Automatic</span>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">04</div>
+      <div class="step-title">Team acts</div>
+      <div class="step-desc">Operations team sees prioritised queue, updates status, dispatches crews.</div>
+      <span class="step-badge badge-red">Live</span>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">05</div>
+      <div class="step-title">Citizen tracks</div>
+      <div class="step-desc">Reporter receives tracking ID and can check status at any time.</div>
+      <span class="step-badge badge-blue">Transparent</span>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="roles">
+  <div class="section-tag">Built for everyone</div>
+  <div class="section-title">One platform. Four roles.</div>
+  <div class="roles-grid">
+    <div class="role-card">
+      <div class="role-emoji">🏙️</div>
+      <div class="role-title">Citizen</div>
+      <ul class="role-list">
+        <li>Report faults in 30 seconds</li>
+        <li>Auto-detected location</li>
+        <li>Get tracking ID instantly</li>
+        <li>Track resolution status</li>
+      </ul>
+    </div>
+    <div class="role-card">
+      <div class="role-emoji">🔧</div>
+      <div class="role-title">Operations</div>
+      <ul class="role-list">
+        <li>Clean prioritised incident queue</li>
+        <li>Zero duplicate confusion</li>
+        <li>AI routes to correct department</li>
+        <li>Update status in one click</li>
+      </ul>
+    </div>
+    <div class="role-card">
+      <div class="role-emoji">📈</div>
+      <div class="role-title">Analyst</div>
+      <ul class="role-list">
+        <li>Hotspot heatmap by ward</li>
+        <li>Trend analysis by category</li>
+        <li>Resolution time metrics</li>
+        <li>Recurring fault detection</li>
+      </ul>
+    </div>
+    <div class="role-card">
+      <div class="role-emoji">🏛️</div>
+      <div class="role-title">Decision-maker</div>
+      <ul class="role-list">
+        <li>Critical incident alerts</li>
+        <li>Resource allocation view</li>
+        <li>Department performance KPIs</li>
+        <li>Evidence-based action cards</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2>Ready to fix your city?</h2>
+  <p>Start reporting issues or explore the operations dashboard now.</p>
+  <a href="/report" class="btn-white">Report an issue →</a>
+  <a href="/dashboard" class="btn-outline-white">View dashboard</a>
+</section>
+
+<footer>
+  <strong>CivicFix AI</strong> — Municipal Intelligence Platform &nbsp;|&nbsp; Built for the people, powered by AI
+</footer>
+
+</body>
+</html>

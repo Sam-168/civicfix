@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Report an Issue — CivicFix AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0a0a;
+  --paper: #f5f2eb;
+  --accent: #e8440a;
+  --accent2: #1a3a2a;
+  --muted: #6b6860;
+  --card: #ffffff;
+  --border: #ddd9d0;
+  --success: #2d7a4f;
+  --critical-bg: #fde8e2; --critical-text: #c0320a;
+  --high-bg: #fef3e2;     --high-text: #b05f00;
+  --medium-bg: #fefce2;   --medium-text: #8a7000;
+  --low-bg: #e8f5ee;      --low-text: #1e6640;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+}
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 48px;
+  background: rgba(245,242,235,0.96);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.logo { font-family: 'Syne',sans-serif; font-weight: 800; font-size: 20px; text-decoration:none; color:var(--ink);}
+.logo span { color: var(--accent); }
+.nav-back {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 500; color: var(--muted);
+  text-decoration: none; transition: color .2s;
+}
+.nav-back:hover { color: var(--ink); }
+
+.page-wrap {
+  max-width: 680px; margin: 0 auto; padding: 60px 24px 100px;
+}
+.page-header { margin-bottom: 48px; }
+.page-tag {
+  font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 12px;
+}
+.page-title {
+  font-family: 'Syne',sans-serif;
+  font-size: 40px; font-weight: 800; letter-spacing: -2px;
+}
+.page-sub { font-size: 16px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+
+/* FORM */
+.form-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px;
+}
+.field-group { margin-bottom: 28px; }
+label {
+  display: block; font-size: 13px; font-weight: 500;
+  letter-spacing: .5px; text-transform: uppercase; color: var(--muted);
+  margin-bottom: 8px;
+}
+textarea, input[type=text] {
+  width: 100%; padding: 14px 16px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: 'DM Sans',sans-serif; font-size: 15px; color: var(--ink);
+  background: var(--paper); resize: vertical;
+  transition: border-color .2s;
+}
+textarea:focus, input[type=text]:focus {
+  outline: none; border-color: var(--accent);
+}
+textarea { min-height: 120px; }
+
+/* Issue type selector */
+.type-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;
+}
+.type-btn {
+  padding: 12px 14px; border: 1.5px solid var(--border);
+  border-radius: 8px; cursor: pointer;
+  font-family: 'DM Sans',sans-serif; font-size: 13px; font-weight: 500;
+  background: var(--paper); color: var(--muted);
+  transition: all .2s; text-align: center;
+}
+.type-btn:hover { border-color: var(--accent); color: var(--accent); }
+.type-btn.selected { border-color: var(--accent); background: var(--critical-bg); color: var(--accent); font-weight: 600; }
+.type-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+/* Location */
+.location-row {
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.location-row input { flex: 1; }
+.btn-locate {
+  padding: 14px 18px; border-radius: 8px;
+  background: var(--ink); color: var(--paper);
+  border: none; cursor: pointer; font-size: 13px; font-weight: 600;
+  font-family: 'DM Sans',sans-serif;
+  transition: background .2s; white-space: nowrap;
+}
+.btn-locate:hover { background: var(--accent); }
+.location-status {
+  font-size: 12px; margin-top: 6px; padding: 6px 10px;
+  border-radius: 6px;
+}
+.location-status.ok { background: #e8f5ee; color: #1e6640; }
+.location-status.err { background: #fde8e2; color: #c0320a; }
+.location-status.loading { background: #f0f0f0; color: #555; }
+
+/* Image upload */
+.upload-area {
+  border: 2px dashed var(--border); border-radius: 10px;
+  padding: 32px; text-align: center; cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+.upload-area:hover { border-color: var(--accent); background: var(--critical-bg); }
+.upload-icon { font-size: 32px; margin-bottom: 8px; }
+.upload-text { font-size: 14px; color: var(--muted); }
+.upload-sub { font-size: 12px; color: #bbb; margin-top: 4px; }
+#file-input { display: none; }
+#preview-wrap { margin-top: 12px; display: none; }
+#preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; }
+
+/* Submit */
+.btn-submit {
+  width: 100%; padding: 18px;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 10px; cursor: pointer;
+  font-family: 'Syne',sans-serif; font-weight: 700; font-size: 17px;
+  transition: background .2s, transform .2s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-submit:hover:not(:disabled) { background: #c93a08; transform: translateY(-1px); }
+.btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+.spinner { display: none; width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* RESULT */
+#result { display: none; margin-top: 32px; }
+.result-card {
+  border-radius: 16px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.result-header {
+  padding: 24px 28px;
+  display: flex; align-items: center; gap: 16px;
+}
+.result-header.new-incident { background: #e8f5ee; }
+.result-header.duplicate { background: #e2ecfd; }
+.result-icon { font-size: 32px; }
+.result-title { font-family: 'Syne',sans-serif; font-size: 20px; font-weight: 700; }
+.result-subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.result-body { background: var(--card); padding: 28px; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.result-field label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); display: block; margin-bottom: 4px; }
+.result-field .value { font-family: 'Syne',sans-serif; font-size: 16px; font-weight: 600; }
+.priority-badge {
+  display: inline-block; padding: 4px 12px; border-radius: 100px;
+  font-size: 13px; font-weight: 600;
+}
+.p-critical { background: var(--critical-bg); color: var(--critical-text); }
+.p-high     { background: var(--high-bg);     color: var(--high-text);     }
+.p-medium   { background: var(--medium-bg);   color: var(--medium-text);   }
+.p-low      { background: var(--low-bg);      color: var(--low-text);      }
+.result-reason {
+  font-size: 14px; color: var(--muted); line-height: 1.6;
+  padding: 16px; background: var(--paper); border-radius: 8px; margin-bottom: 16px;
+}
+.tracking-id {
+  font-family: 'Syne',sans-serif; font-size: 14px; font-weight: 600;
+  color: var(--muted); text-align: center; padding: 12px;
+  border: 1.5px dashed var(--border); border-radius: 8px;
+}
+.tracking-id span { color: var(--accent); }
+.btn-new {
+  display: block; width: 100%; margin-top: 16px;
+  padding: 14px; text-align: center; border-radius: 8px;
+  background: var(--ink); color: var(--paper);
+  font-family: 'Syne',sans-serif; font-weight: 600; font-size: 14px;
+  text-decoration: none; transition: background .2s;
+}
+.btn-new:hover { background: var(--accent); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Civic<span>Fix</span> AI</a>
+  <a href="/" class="nav-back">← Back to home</a>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="page-tag">Citizen reporting</div>
+    <h1 class="page-title">Report an issue</h1>
+    <p class="page-sub">Describe the problem and we'll automatically classify it, assign the right team, and track it to resolution.</p>
+  </div>
+
+  <div class="form-card">
+    <form id="report-form">
+
+      <div class="field-group">
+        <label>Issue type (optional — we'll detect it)</label>
+        <div class="type-grid" id="type-grid">
+          <div class="type-btn" data-type="Water Leak">
+            <span class="type-icon">💧</span>Water Leak
+          </div>
+          <div class="type-btn" data-type="Pothole">
+            <span class="type-icon">🚧</span>Pothole
+          </div>
+          <div class="type-btn" data-type="Electricity Outage">
+            <span class="type-icon">⚡</span>Power Outage
+          </div>
+          <div class="type-btn" data-type="Waste Collection">
+            <span class="type-icon">🗑️</span>Waste
+          </div>
+          <div class="type-btn" data-type="Broken Streetlight">
+            <span class="type-icon">💡</span>Streetlight
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Describe the problem *</label>
+        <textarea id="description" placeholder="e.g. Burst pipe flooding the road near the primary school on Main Street. Water has been flowing for about 2 hours." required></textarea>
+      </div>
+
+      <div class="field-group">
+        <label>Location</label>
+        <div class="location-row">
+          <input type="text" id="address" placeholder="Address will appear here after detection…" readonly>
+          <button type="button" class="btn-locate" onclick="getLocation()">📍 Detect</button>
+        </div>
+        <div id="location-status"></div>
+        <input type="hidden" id="lat" value="">
+        <input type="hidden" id="lon" value="">
+      </div>
+
+      <div class="field-group">
+        <label>Photo (optional)</label>
+        <div class="upload-area" onclick="document.getElementById('file-input').click()">
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">Click to upload a photo</div>
+          <div class="upload-sub">JPG, PNG up to 10MB</div>
+        </div>
+        <input type="file" id="file-input" accept="image/*" onchange="previewImage(this)">
+        <div id="preview-wrap"><img id="preview-img" alt="Preview"></div>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submit-btn">
+        <span class="spinner" id="spinner"></span>
+        <span id="submit-text">Submit Report →</span>
+      </button>
+    </form>
+  </div>
+
+  <div id="result">
+    <div class="result-card">
+      <div class="result-header" id="result-header">
+        <div class="result-icon" id="result-icon"></div>
+        <div>
+          <div class="result-title" id="result-title"></div>
+          <div class="result-subtitle" id="result-subtitle"></div>
+        </div>
+      </div>
+      <div class="result-body">
+        <div class="result-grid">
+          <div class="result-field">
+            <label>Issue type</label>
+            <div class="value" id="res-type">—</div>
+          </div>
+          <div class="result-field">
+            <label>Priority</label>
+            <div class="value" id="res-priority">—</div>
+          </div>
+          <div class="result-field">
+            <label>Department</label>
+            <div class="value" id="res-dept">—</div>
+          </div>
+          <div class="result-field">
+            <label>Status</label>
+            <div class="value" id="res-status">—</div>
+          </div>
+        </div>
+        <div class="result-reason" id="res-reason"></div>
+        <div class="tracking-id" id="res-tracking"></div>
+        <a href="/report" class="btn-new">Report another issue</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let selectedType = null;
+
+document.querySelectorAll('.type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedType = btn.dataset.type;
+  });
+});
+
+function getLocation() {
+  const status = document.getElementById('location-status');
+  status.className = 'location-status loading';
+  status.textContent = 'Detecting your location…';
+  if (!navigator.geolocation) {
+    status.className = 'location-status err';
+    status.textContent = 'Geolocation not supported. Enter address manually.';
+    document.getElementById('address').readOnly = false;
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    document.getElementById('lat').value = lat;
+    document.getElementById('lon').value = lon;
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
+      .then(r => r.json())
+      .then(data => {
+        const addr = data.display_name || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+        document.getElementById('address').value = addr;
+        status.className = 'location-status ok';
+        status.textContent = '✓ Location captured';
+      })
+      .catch(() => {
+        document.getElementById('address').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+        status.className = 'location-status ok';
+        status.textContent = '✓ Coordinates captured';
+      });
+  }, err => {
+    status.className = 'location-status err';
+    status.textContent = 'Could not get location. You can enter the address manually.';
+    document.getElementById('address').readOnly = false;
+  });
+}
+
+function previewImage(input) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('preview-img').src = e.target.result;
+      document.getElementById('preview-wrap').style.display = 'block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+document.getElementById('report-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const desc = document.getElementById('description').value.trim();
+  if (!desc) return;
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  document.getElementById('spinner').style.display = 'block';
+  document.getElementById('submit-text').textContent = 'Analysing…';
+
+  // use Cape Town coords as fallback for demo
+  const lat = parseFloat(document.getElementById('lat').value) || -33.9249 + (Math.random()-.5)*.02;
+  const lon = parseFloat(document.getElementById('lon').value) || 18.4241 + (Math.random()-.5)*.02;
+  const address = document.getElementById('address').value || 'Cape Town, South Africa';
+
+  try {
+    const resp = await fetch('/api/submit', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ description: desc, lat, lon, address })
+    });
+    const data = await resp.json();
+    showResult(data);
+  } catch(err) {
+    alert('Submission failed. Please check your connection and try again.');
+    btn.disabled = false;
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('submit-text').textContent = 'Submit Report →';
+  }
+});
+
+function showResult(data) {
+  document.getElementById('result').style.display = 'block';
+  document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const hdr = document.getElementById('result-header');
+  if (data.is_duplicate) {
+    hdr.className = 'result-header duplicate';
+    document.getElementById('result-icon').textContent = '🔗';
+    document.getElementById('result-title').textContent = 'Linked to existing incident';
+    document.getElementById('result-subtitle').textContent = `Your report has been added to ${data.linked_incident} — ${data.report_count} reports now linked`;
+  } else {
+    hdr.className = 'result-header new-incident';
+    document.getElementById('result-icon').textContent = '✅';
+    document.getElementById('result-title').textContent = 'New incident created';
+    document.getElementById('result-subtitle').textContent = `Incident ${data.incident_id} has been raised and assigned`;
+  }
+
+  document.getElementById('res-type').textContent = data.issue_type;
+
+  const prioEl = document.getElementById('res-priority');
+  const cls = { Critical: 'p-critical', High: 'p-high', Medium: 'p-medium', Low: 'p-low' }[data.priority] || 'p-low';
+  prioEl.innerHTML = `<span class="priority-badge ${cls}">${data.priority}</span>`;
+
+  document.getElementById('res-dept').textContent = data.department;
+  document.getElementById('res-status').textContent = data.status;
+  document.getElementById('res-reason').textContent = data.reason;
+
+  const tid = data.incident_id || data.linked_incident;
+  document.getElementById('res-tracking').innerHTML = `Tracking ID: <span>${data.report_id}</span> &nbsp;·&nbsp; Incident: <span>${tid}</span>`;
+
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('spinner').style.display = 'none';
+  document.getElementById('submit-text').textContent = 'Submit Another Report →';
+}
+</script>
+</body>
+</html>
