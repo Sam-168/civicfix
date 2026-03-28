@@ -129,10 +129,10 @@
       "lat": -33.90240704162944,
       "lon": 18.60839104364255,
       "address": "Voortrekker Road, Cape Town Ward 10, Parow, City of Cape Town, Western Cape, 7499, South Africa",
-      "status": "Submitted",
-      "report_count": 1,
+      "status": "Resolved",
+      "report_count": 5,
       "created_at": "2026-03-27T21:13:09.782698Z",
-      "updated_at": "2026-03-27T21:13:09.782711Z",
+      "updated_at": "2026-03-28T05:53:47.569665Z",
       "ward": "Unknown"
     },
     {
@@ -144,10 +144,25 @@
       "lat": -33.9024081358817,
       "lon": 18.608386034073547,
       "address": "Voortrekker Road, Cape Town Ward 10, Parow, City of Cape Town, Western Cape, 7499, South Africa",
-      "status": "Submitted",
-      "report_count": 1,
+      "status": "Resolved",
+      "report_count": 2,
       "created_at": "2026-03-27T21:21:22.640271Z",
-      "updated_at": "2026-03-27T21:21:22.640282Z",
+      "updated_at": "2026-03-28T05:43:28.177282Z",
+      "ward": "Unknown"
+    },
+    {
+      "id": "INC-110",
+      "issue_type": "Waste Collection",
+      "department": "Waste Management",
+      "priority": "Low",
+      "description": "The waste is accumulating, no truck collecting waste in a month,",
+      "lat": -33.90240666387992,
+      "lon": 18.60838415404335,
+      "address": "Voortrekker Road, Cape Town Ward 10, Parow, City of Cape Town, Western Cape, 7499, South Africa",
+      "status": "Submitted",
+      "report_count": 2,
+      "created_at": "2026-03-27T23:03:36.350179Z",
+      "updated_at": "2026-03-28T05:47:18.758982Z",
       "ward": "Unknown"
     }
   ],
@@ -171,6 +186,79 @@
       "address": "Voortrekker Road, Cape Town Ward 10, Parow, City of Cape Town, Western Cape, 7499, South Africa",
       "submitted_at": "2026-03-27T21:21:22.640291Z",
       "is_duplicate": false
+    },
+    {
+      "id": "RPT-8D0285",
+      "incident_id": "INC-110",
+      "description": "The waste is accumulating, no truck collecting waste in a month,",
+      "lat": -33.90240666387992,
+      "lon": 18.60838415404335,
+      "address": "Voortrekker Road, Cape Town Ward 10, Parow, City of Cape Town, Western Cape, 7499, South Africa",
+      "submitted_at": "2026-03-27T23:03:36.350219Z",
+      "is_duplicate": false
+    },
+    {
+      "id": "RPT-05B403",
+      "incident_id": "INC-108",
+      "description": "Pipe Burst in 2 months been leaking",
+      "lat": -33.902408319755814,
+      "lon": 18.608363738378078,
+      "address": "Cape Town, South Africa",
+      "submitted_at": "2026-03-27T23:34:10.682007Z",
+      "is_duplicate": true
+    },
+    {
+      "id": "RPT-17779B",
+      "incident_id": "INC-108",
+      "description": "Pipe burst in the roads and is flooding the street.",
+      "lat": -33.90240851732802,
+      "lon": 18.608384213420575,
+      "address": "Voortrekker Road, Cape Town Ward 10, Parow, City of Cape Town, Western Cape, 7499, South Africa",
+      "submitted_at": "2026-03-27T23:49:22.098555Z",
+      "is_duplicate": true
+    },
+    {
+      "id": "RPT-DCDA7F",
+      "incident_id": "INC-108",
+      "description": "Pipe leaking",
+      "lat": -33.9024191059942,
+      "lon": 18.608376600314276,
+      "address": "Voortrekker Road, Cape Town Ward 10, Parow, City of Cape Town, Western Cape, 7499, South Africa",
+      "submitted_at": "2026-03-28T00:32:54.768479Z",
+      "is_duplicate": true
+    },
+    {
+      "id": "RPT-47F2B4",
+      "incident_id": "INC-108",
+      "description": "Burst or Broken Pipes: Visible water flowing, spraying, or streaming from a pipe, particularly if it is a major supply line.",
+      "lat": -33.902408559830995,
+      "lon": 18.608361775423106,
+      "address": "Voortrekker Road, Cape Town Ward 10, Parow, City of Cape Town, Western Cape, 7499, South Africa",
+      "submitted_at": "2026-03-28T04:33:50.896173Z",
+      "is_duplicate": true,
+      "submitted_by": "bossvee47@gmail.com"
+    },
+    {
+      "id": "RPT-9C0278",
+      "incident_id": "INC-109",
+      "description": "Pothole in the street that is getting bigger needs to be fixed",
+      "lat": -33.90241661982819,
+      "lon": 18.60838827953323,
+      "address": "Voortrekker Road, Cape Town Ward 10, Parow, City of Cape Town, Western Cape, 7499, South Africa",
+      "submitted_at": "2026-03-28T05:42:27.680321Z",
+      "is_duplicate": true,
+      "submitted_by": "avuzwa091@gmail.com"
+    },
+    {
+      "id": "RPT-61554C",
+      "incident_id": "INC-110",
+      "description": "No waste collection truck came in 2 months",
+      "lat": -33.90240614261506,
+      "lon": 18.6083292441934,
+      "address": "Boompies Street, Cape Town Ward 10, Parow, City of Cape Town, Western Cape, 7505, South Africa",
+      "submitted_at": "2026-03-28T05:47:18.758995Z",
+      "is_duplicate": true,
+      "submitted_by": "avuzwa091@gmail.com"
     }
   ]
 }

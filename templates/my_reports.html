@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Reports — CivicFix AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0a0a0a;--paper:#f5f2eb;--card:#fff;--border:#ddd9d0;--accent:#e8440a;--muted:#6b6860;--sidebar:#0d0d0d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--sidebar);color:#fff;padding:28px 0;display:flex;flex-direction:column}
+.logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;padding:0 24px 28px;border-bottom:1px solid #222}
+.logo span{color:var(--accent)}
+.nav{padding:20px 0;display:flex;flex-direction:column;gap:4px}
+.nav a{color:#bbb;text-decoration:none;padding:12px 24px;font-size:15px;font-weight:500}
+.nav a.active,.nav a:hover{background:#1b1b1b;color:#fff}
+.bottom{margin-top:auto;padding:20px 24px;border-top:1px solid #222}
+.logout{display:block;text-align:center;padding:12px 14px;border-radius:10px;background:#fff;color:#111;text-decoration:none;font-weight:700}
+.main{flex:1;padding:36px}
+.table-card{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+h1{font-family:'Syne',sans-serif;font-size:36px;margin-bottom:18px}
+table{width:100%;border-collapse:collapse}
+th{padding:12px 16px;background:#faf7f0;border-bottom:1px solid var(--border);font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#666;text-align:left}
+td{padding:14px 16px;border-bottom:1px solid var(--border);font-size:14px}
+.badge{display:inline-flex;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.b-submitted{background:#e8f5ee;color:#1e6640}
+.b-pending{background:#fef3e2;color:#b05f00}
+.b-resolved{background:#f0f0f0;color:#555}
+@media (max-width:860px){body{display:block}.sidebar{width:100%}.main{padding:20px}}
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">Civic<span>Fix</span> AI</div>
+    <nav class="nav">
+      <a href="/home">Home</a>
+      <a href="/report">Report a Fault</a>
+      <a href="/my-reports" class="active">My Reports</a>
+    </nav>
+    <div class="bottom">
+      <a class="logout" href="/logout">Logout</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <h1>My Reports</h1>
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Report ID</th>
+            <th>Issue Type</th>
+            <th>Location</th>
+            <th>Priority</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="my-reports-body"></tbody>
+      </table>
+    </div>
+  </main>
+
+<script>
+function statusClass(status) {
+  return {
+    'Submitted': 'b-submitted',
+    'Pending': 'b-pending',
+    'Resolved': 'b-resolved'
+  }[status] || 'b-submitted';
+}
+
+async function loadMyReports() {
+  const res = await fetch('/api/my-reports');
+  const reports = await res.json();
+  const body = document.getElementById('my-reports-body');
+
+  if (!reports.length) {
+    body.innerHTML = '<tr><td colspan="5" style="padding:24px;text-align:center;color:#6b6860">No reports submitted yet.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = reports.map(r => `
+    <tr>
+      <td>${r.report_id}</td>
+      <td>${r.issue_type}</td>
+      <td>${r.address}</td>
+      <td>${r.priority}</td>
+      <td><span class="badge ${statusClass(r.status)}">${r.status}</span></td>
+    </tr>
+  `).join('');
+}
+
+loadMyReports();
+</script>
+</body>
+</html>

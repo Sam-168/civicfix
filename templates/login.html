@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login — CivicFix AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0a0a; --paper:#f5f2eb; --card:#ffffff; --border:#ddd9d0;
+  --accent:#e8440a; --muted:#6b6860;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.card{
+  width:100%;max-width:480px;background:#fff;border:1px solid var(--border);
+  border-radius:24px;padding:28px;box-shadow:0 12px 40px rgba(0,0,0,.05);
+}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;margin-bottom:18px}
+.logo span{color:var(--accent)}
+h1{font-family:'Syne',sans-serif;font-size:34px;line-height:1;margin-bottom:12px}
+p{color:var(--muted);line-height:1.7;margin-bottom:22px}
+label{display:block;margin-bottom:8px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#555}
+input,select{
+  width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--border);
+  background:#faf7f0;font-family:'DM Sans',sans-serif;font-size:15px;margin-bottom:16px;
+}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+.btn{
+  width:100%;padding:14px 18px;border:none;border-radius:12px;background:var(--accent);
+  color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;
+}
+.btn:hover{background:#cf3c08}
+.error{
+  margin-bottom:16px;padding:12px 14px;border-radius:12px;
+  background:#fde8e2;color:#b73306;font-size:14px;
+}
+.back{display:inline-block;margin-top:16px;color:var(--muted);text-decoration:none;font-size:14px}
+.back:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">Civic<span>Fix</span> AI</div>
+    <h1>Sign in</h1>
+    <p>Choose your access type and continue into the platform.</p>
+
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="/login">
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" placeholder="Your name">
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" required>
+
+      <label for="login_as">Sign in as</label>
+      <select id="login_as" name="login_as">
+        <option value="user" {% if request.args.get('role') == 'user' %}selected{% endif %}>User</option>
+        <option value="admin" {% if request.args.get('role') == 'admin' %}selected{% endif %}>Admin</option>
+      </select>
+
+      <button class="btn" type="submit">Continue</button>
+    </form>
+
+    <a class="back" href="/">← Back to welcome</a>
+  </div>
+</body>
+</html>

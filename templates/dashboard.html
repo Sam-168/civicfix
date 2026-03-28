@@ -5,748 +5,214 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dashboard — CivicFix AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-:root {
-  --ink: #0a0a0a;
-  --paper: #f5f2eb;
-  --accent: #e8440a;
-  --muted: #6b6860;
-  --card: #ffffff;
-  --border: #ddd9d0;
-  --sidebar: #0d0d0d;
-  --sidebar-text: #aaa;
-  --sidebar-active: #fff;
-}
-*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--paper);
-  color: var(--ink);
-  display: flex;
-  min-height: 100vh;
-}
-
-/* SIDEBAR */
-.sidebar {
-  width: 220px; flex-shrink: 0;
-  background: var(--sidebar);
-  display: flex; flex-direction: column;
-  padding: 28px 0;
-  position: fixed; top: 0; left: 0; bottom: 0;
-  z-index: 100;
-}
-.sidebar-logo {
-  font-family: 'Syne', sans-serif;
-  font-size: 18px; font-weight: 800;
-  color: #fff; padding: 0 24px 32px;
-  border-bottom: 1px solid #222;
-}
-.sidebar-logo span { color: var(--accent); }
-.sidebar-nav { flex: 1; padding: 20px 0; }
-.nav-label {
-  font-size: 10px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
-  color: #555; padding: 0 24px 10px; display: block;
-}
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 24px; font-size: 14px; font-weight: 500;
-  color: var(--sidebar-text); cursor: pointer;
-  transition: color .2s, background .2s;
-  border: none; background: none; width: 100%; text-align: left;
-}
-.nav-item:hover { color: var(--sidebar-active); background: #1a1a1a; }
-.nav-item.active { color: var(--sidebar-active); background: #1a1a1a; border-left: 2px solid var(--accent); }
-.nav-item .icon { width: 18px; }
-.sidebar-bottom { padding: 20px 24px; border-top: 1px solid #222; }
-.btn-report {
-  display: block; padding: 12px 16px; border-radius: 8px;
-  background: var(--accent); color: #fff; text-align: center;
-  text-decoration: none; font-family: 'Syne',sans-serif; font-size: 13px; font-weight: 700;
-  transition: background .2s;
-}
-.btn-report:hover { background: #c93a08; }
-
-/* MAIN */
-.main {
-  margin-left: 220px; flex: 1;
-  display: flex; flex-direction: column;
-}
-.topbar {
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  padding: 18px 36px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.topbar-title {
-  font-family: 'Syne',sans-serif; font-size: 20px; font-weight: 700;
-}
-.topbar-right { display: flex; gap: 12px; align-items: center; }
-.filter-select {
-  padding: 8px 14px; border: 1.5px solid var(--border); border-radius: 6px;
-  font-family: 'DM Sans',sans-serif; font-size: 13px; background: var(--paper);
-  color: var(--ink); cursor: pointer;
-}
-.refresh-btn {
-  padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 6px;
-  font-family: 'DM Sans',sans-serif; font-size: 13px;
-  background: var(--ink); color: var(--paper); cursor: pointer;
-  transition: background .2s;
-}
-.refresh-btn:hover { background: var(--accent); border-color: var(--accent); }
-
-.content { padding: 36px; flex: 1; }
-
-/* PANELS */
-.panel { display: none; }
-.panel.active { display: block; }
-
-/* STAT CARDS */
-.stats-row {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 36px;
-}
-.stat-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  padding: 24px; position: relative; overflow: hidden;
-  transition: box-shadow .2s;
-}
-.stat-card:hover { box-shadow: 0 4px 24px rgba(0,0,0,.08); }
-.stat-card::after {
-  content: ''; position: absolute; right: -10px; top: -10px;
-  width: 60px; height: 60px; border-radius: 50%;
-  opacity: .06;
-}
-.stat-card.orange::after { background: var(--accent); }
-.stat-card.red::after    { background: #e8440a; }
-.stat-card.green::after  { background: #2d7a4f; }
-.stat-card.blue::after   { background: #1a5fa8; }
-.stat-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px; }
-.stat-card-value { font-family: 'Syne',sans-serif; font-size: 40px; font-weight: 800; line-height: 1; }
-.stat-card-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
-
-/* SECTION TITLE */
-.section-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 16px;
-}
-.section-title {
-  font-family: 'Syne',sans-serif; font-size: 18px; font-weight: 700;
-}
-
-/* TABLE */
-.table-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  overflow: hidden; margin-bottom: 36px;
-}
-table { width: 100%; border-collapse: collapse; }
-thead { background: var(--paper); }
-th {
-  padding: 12px 16px; font-size: 11px; font-weight: 500;
-  letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted);
-  text-align: left; border-bottom: 1px solid var(--border);
-}
-td {
-  padding: 14px 16px; font-size: 14px;
-  border-bottom: 1px solid var(--border);
-}
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(245,242,235,.5); }
-.badge {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 4px 10px; border-radius: 100px;
-  font-size: 12px; font-weight: 600;
-}
-.b-critical { background: #fde8e2; color: #c0320a; }
-.b-high     { background: #fef3e2; color: #b05f00; }
-.b-medium   { background: #fefce2; color: #8a7000; }
-.b-low      { background: #e8f5ee; color: #1e6640; }
-.b-submitted  { background: #e8f5ee; color: #1e6640; }
-.b-assigned   { background: #e2ecfd; color: #1a5fa8; }
-.b-inprogress { background: #fef3e2; color: #b05f00; }
-.b-resolved   { background: #f0f0f0; color: #555; }
-.inc-id { font-family: 'Syne',sans-serif; font-size: 12px; font-weight: 600; color: var(--accent); }
-.rep-count {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-size: 12px; color: var(--muted);
-}
-.rep-count.hot { color: var(--accent); font-weight: 600; }
-
-/* STATUS SELECT */
-.status-select {
-  padding: 6px 10px; border: 1.5px solid var(--border); border-radius: 6px;
-  font-family: 'DM Sans',sans-serif; font-size: 12px; background: var(--paper);
-  cursor: pointer;
-}
-.status-select:focus { outline: none; border-color: var(--accent); }
-
-/* CHARTS GRID */
-.charts-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 36px;
-}
-.chart-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  padding: 24px;
-}
-.chart-title {
-  font-family: 'Syne',sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 20px;
-}
-.chart-container { position: relative; height: 220px; }
-
-/* MAP PLACEHOLDER */
-.map-card {
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  overflow: hidden; margin-bottom: 36px;
-}
-.map-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-.map-body {
-  position: relative; height: 400px;
-  background: #f0ede6;
-  display: flex; align-items: center; justify-content: center;
-}
-.map-svg-wrap { width: 100%; height: 100%; position: relative; overflow: hidden; }
-.map-legend {
-  position: absolute; bottom: 16px; right: 16px;
-  background: rgba(255,255,255,.95); border-radius: 8px; padding: 14px 16px;
-  border: 1px solid var(--border); font-size: 12px;
-}
-.legend-item { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
-.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-
-/* CHATBOT */
-.chat-wrap {
-  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-  overflow: hidden; display: flex; flex-direction: column; height: 600px;
-}
-.chat-header {
-  padding: 20px 24px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 12px;
-}
-.chat-avatar {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: var(--accent); display: flex; align-items: center; justify-content: center;
-  color: #fff; font-size: 16px;
-}
-.chat-name { font-family: 'Syne',sans-serif; font-weight: 700; }
-.chat-status { font-size: 12px; color: #2d7a4f; }
-.chat-messages {
-  flex: 1; overflow-y: auto; padding: 24px;
-  display: flex; flex-direction: column; gap: 16px;
-}
-.msg { max-width: 75%; }
-.msg.bot { align-self: flex-start; }
-.msg.user { align-self: flex-end; }
-.msg-bubble {
-  padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6;
-}
-.msg.bot .msg-bubble { background: var(--paper); border-radius: 4px 12px 12px 12px; }
-.msg.user .msg-bubble { background: var(--accent); color: #fff; border-radius: 12px 4px 12px 12px; }
-.msg-time { font-size: 11px; color: var(--muted); margin-top: 4px; padding: 0 4px; }
-.chat-suggestions { padding: 12px 24px; display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--border); }
-.suggestion {
-  padding: 6px 14px; border-radius: 100px;
-  border: 1.5px solid var(--border); background: var(--paper);
-  font-size: 12px; cursor: pointer; transition: all .2s;
-}
-.suggestion:hover { border-color: var(--accent); color: var(--accent); }
-.chat-input-row {
-  padding: 16px 24px; border-top: 1px solid var(--border);
-  display: flex; gap: 10px;
-}
-.chat-input {
-  flex: 1; padding: 12px 16px;
-  border: 1.5px solid var(--border); border-radius: 8px;
-  font-family: 'DM Sans',sans-serif; font-size: 14px;
-  background: var(--paper);
-}
-.chat-input:focus { outline: none; border-color: var(--accent); }
-.chat-send {
-  padding: 12px 20px; background: var(--accent); color: #fff;
-  border: none; border-radius: 8px; cursor: pointer;
-  font-family: 'Syne',sans-serif; font-weight: 600; font-size: 14px;
-  transition: background .2s;
-}
-.chat-send:hover { background: #c93a08; }
-
-/* Typing indicator */
-.typing-dots span {
-  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--muted); margin: 0 2px;
-  animation: bounce .9s infinite;
-}
-.typing-dots span:nth-child(2) { animation-delay: .15s; }
-.typing-dots span:nth-child(3) { animation-delay: .3s; }
-@keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
-
-/* toast */
-.toast {
-  position: fixed; bottom: 24px; right: 24px;
-  background: var(--ink); color: var(--paper);
-  padding: 14px 20px; border-radius: 8px;
-  font-size: 14px; font-weight: 500; z-index: 999;
-  transform: translateY(80px); opacity: 0; transition: all .3s;
-}
-.toast.show { transform: translateY(0); opacity: 1; }
+:root{--ink:#0a0a0a;--paper:#f5f2eb;--accent:#e8440a;--muted:#6b6860;--card:#fff;--border:#ddd9d0;--sidebar:#0d0d0d;--sidebar-text:#aaa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);display:flex;min-height:100vh}
+.sidebar{width:220px;flex-shrink:0;background:var(--sidebar);display:flex;flex-direction:column;padding:28px 0;position:fixed;top:0;left:0;bottom:0}
+.sidebar-logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff;padding:0 24px 32px;border-bottom:1px solid #222}
+.sidebar-logo span{color:var(--accent)}
+.sidebar-nav{flex:1;padding:20px 0}
+.nav-label{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#555;padding:0 24px 10px;display:block}
+.nav-item{display:flex;align-items:center;gap:10px;padding:12px 24px;font-size:14px;font-weight:500;color:var(--sidebar-text);text-decoration:none}
+.nav-item:hover,.nav-item.active{color:#fff;background:#1a1a1a;border-left:2px solid var(--accent)}
+.sidebar-bottom{padding:20px 24px;border-top:1px solid #222}
+.btn-logout{display:block;padding:12px 16px;border-radius:8px;background:#fff;color:#111;text-align:center;text-decoration:none;font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:18px 36px;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
+.topbar-right{font-size:14px;color:var(--muted)}
+.content{padding:36px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card,.panel{background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px}
+.stat-card-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px}
+.stat-card-value{font-family:'Syne',sans-serif;font-size:40px;font-weight:800;line-height:1}
+.stat-card-sub{font-size:12px;color:var(--muted);margin-top:6px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+.chart-container{position:relative;height:260px}
+.panel-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:16px}
+.hotspot,.rec{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;background:#faf7f0}
+.hotspot strong,.rec strong{display:block;margin-bottom:6px}
+.hotspot p,.rec p{color:var(--muted);font-size:14px;line-height:1.6}
+.badge{display:inline-flex;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.b-critical{background:#fde8e2;color:#c0320a}
+.b-high{background:#fef3e2;color:#b05f00}
+.b-medium{background:#fefce2;color:#8a7000}
+.b-low{background:#e8f5ee;color:#1e6640}
+@media (max-width:1100px){.stats-row,.grid-2{grid-template-columns:1fr 1fr}}
+@media (max-width:860px){body{display:block}.sidebar{position:relative;width:100%}.main{margin-left:0}.content{padding:20px}.stats-row,.grid-2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="sidebar-logo">Civic<span>Fix</span> AI</div>
-  <nav class="sidebar-nav">
-    <span class="nav-label">Operations</span>
-    <button class="nav-item active" onclick="showPanel('overview')">
-      <span class="icon">📊</span> Overview
-    </button>
-    <button class="nav-item" onclick="showPanel('incidents')">
-      <span class="icon">📋</span> Incidents
-    </button>
-    <button class="nav-item" onclick="showPanel('map')">
-      <span class="icon">🗺️</span> Map view
-    </button>
-    <span class="nav-label" style="margin-top:16px">Analytics</span>
-    <button class="nav-item" onclick="showPanel('analytics')">
-      <span class="icon">📈</span> Analytics
-    </button>
-    <button class="nav-item" onclick="showPanel('chatbot')">
-      <span class="icon">🤖</span> AI Assistant
-    </button>
-  </nav>
-  <div class="sidebar-bottom">
-    <a href="/report" class="btn-report">+ Report Issue</a>
-  </div>
-</aside>
-
-<!-- MAIN -->
-<div class="main">
-  <div class="topbar">
-    <div class="topbar-title" id="topbar-title">Dashboard overview</div>
-    <div class="topbar-right">
-      <select class="filter-select" id="filter-status" onchange="applyFilters()">
-        <option value="">All statuses</option>
-        <option value="Submitted">Submitted</option>
-        <option value="Assigned">Assigned</option>
-        <option value="In Progress">In Progress</option>
-        <option value="Resolved">Resolved</option>
-      </select>
-      <select class="filter-select" id="filter-type" onchange="applyFilters()">
-        <option value="">All types</option>
-        <option value="Water Leak">Water Leak</option>
-        <option value="Pothole">Pothole</option>
-        <option value="Electricity Outage">Electricity Outage</option>
-        <option value="Waste Collection">Waste Collection</option>
-        <option value="Broken Streetlight">Broken Streetlight</option>
-      </select>
-      <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+  <aside class="sidebar">
+    <div class="sidebar-logo">Civic<span>Fix</span> AI</div>
+    <nav class="sidebar-nav">
+      <span class="nav-label">Admin</span>
+      <a class="nav-item active" href="/dashboard">Dashboard</a>
+      <a class="nav-item" href="/incidents">Incidents</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="/logout" class="btn-logout">Logout</a>
     </div>
-  </div>
+  </aside>
 
-  <div class="content">
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">Dashboard Overview</div>
+      <div class="topbar-right">{{ user.email }}</div>
+    </div>
 
-    <!-- OVERVIEW -->
-    <div class="panel active" id="panel-overview">
-      <div class="stats-row" id="stats-row">
-        <div class="stat-card orange"><div class="stat-card-label">Total incidents</div><div class="stat-card-value" id="s-total">—</div><div class="stat-card-sub">All time</div></div>
-        <div class="stat-card red"><div class="stat-card-label">Open issues</div><div class="stat-card-value" id="s-open">—</div><div class="stat-card-sub">Requiring action</div></div>
-        <div class="stat-card blue"><div class="stat-card-label">High/Critical</div><div class="stat-card-value" id="s-high">—</div><div class="stat-card-sub">Priority incidents</div></div>
-        <div class="stat-card green"><div class="stat-card-label">Resolved today</div><div class="stat-card-value" id="s-resolved">—</div><div class="stat-card-sub">Completed</div></div>
+    <div class="content">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card-label">Total incidents</div>
+          <div class="stat-card-value" id="s-total">—</div>
+          <div class="stat-card-sub">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Open issues</div>
+          <div class="stat-card-value" id="s-open">—</div>
+          <div class="stat-card-sub">Requiring action</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">High/Critical</div>
+          <div class="stat-card-value" id="s-high">—</div>
+          <div class="stat-card-sub">Priority incidents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Resolved today</div>
+          <div class="stat-card-value" id="s-resolved">—</div>
+          <div class="stat-card-sub">Completed</div>
+        </div>
       </div>
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-title">Issues by category</div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-title">Issues by category</div>
           <div class="chart-container"><canvas id="cat-chart"></canvas></div>
         </div>
-        <div class="chart-card">
-          <div class="chart-title">Status breakdown</div>
+
+        <div class="panel">
+          <div class="panel-title">Status breakdown</div>
           <div class="chart-container"><canvas id="status-chart"></canvas></div>
         </div>
       </div>
-      <div class="section-header"><div class="section-title">Critical & high priority incidents</div></div>
-      <div class="table-card"><table><thead><tr><th>ID</th><th>Type</th><th>Location</th><th>Priority</th><th>Reports</th><th>Status</th></tr></thead>
-        <tbody id="overview-table-body"></tbody></table></div>
-    </div>
 
-    <!-- INCIDENTS -->
-    <div class="panel" id="panel-incidents">
-      <div class="section-header">
-        <div class="section-title">All incidents</div>
-        <span id="incidents-count" style="font-size:13px;color:var(--muted)"></span>
-      </div>
-      <div class="table-card"><table><thead><tr><th>ID</th><th>Type</th><th>Description</th><th>Location</th><th>Priority</th><th>Reports</th><th>Status</th><th>Action</th></tr></thead>
-        <tbody id="incidents-table-body"></tbody></table></div>
-    </div>
-
-    <!-- MAP -->
-    <div class="panel" id="panel-map">
-      <div class="section-header"><div class="section-title">Incident hotspot map</div></div>
-      <div class="map-card">
-        <div class="map-header">
-          <div><strong>Cape Town — Active incidents</strong> <span id="map-count" style="font-size:13px;color:var(--muted);margin-left:8px"></span></div>
-          <span style="font-size:12px;color:var(--muted)">Pin size = report count · Colour = priority</span>
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-title">Chronic Hotspots</div>
+          <div id="hotspots-list"></div>
         </div>
-        <div class="map-body">
-          <svg id="map-svg" width="100%" height="400" viewBox="0 0 800 400" style="background:#e8e4dc"></svg>
-          <div class="map-legend">
-            <div style="font-size:11px;font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Priority</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#e8440a"></div> Critical</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#e07b00"></div> High</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#c9a800"></div> Medium</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#2d7a4f"></div> Low</div>
-          </div>
+
+        <div class="panel">
+          <div class="panel-title">Recommended Actions</div>
+          <div id="recommendations-list"></div>
         </div>
       </div>
     </div>
-
-    <!-- ANALYTICS -->
-    <div class="panel" id="panel-analytics">
-      <div class="stats-row" id="stats-row-2">
-        <div class="stat-card orange"><div class="stat-card-label">Total incidents</div><div class="stat-card-value" id="a-total">—</div></div>
-        <div class="stat-card red"><div class="stat-card-label">Open issues</div><div class="stat-card-value" id="a-open">—</div></div>
-        <div class="stat-card blue"><div class="stat-card-label">High/Critical</div><div class="stat-card-value" id="a-high">—</div></div>
-        <div class="stat-card green"><div class="stat-card-label">Top category</div><div class="stat-card-value" id="a-top" style="font-size:20px;margin-top:4px">—</div></div>
-      </div>
-      <div class="charts-grid">
-        <div class="chart-card">
-          <div class="chart-title">Incidents by type</div>
-          <div class="chart-container"><canvas id="anal-cat-chart"></canvas></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-title">Priority distribution</div>
-          <div class="chart-container"><canvas id="anal-prio-chart"></canvas></div>
-        </div>
-      </div>
-      <div class="chart-card" style="margin-bottom:36px">
-        <div class="chart-title">Status pipeline</div>
-        <div class="chart-container"><canvas id="anal-status-bar"></canvas></div>
-      </div>
-    </div>
-
-    <!-- CHATBOT -->
-    <div class="panel" id="panel-chatbot">
-      <div class="chat-wrap">
-        <div class="chat-header">
-          <div class="chat-avatar">🤖</div>
-          <div>
-            <div class="chat-name">CivicFix Assistant</div>
-            <div class="chat-status">● Online — ready to help</div>
-          </div>
-        </div>
-        <div class="chat-messages" id="chat-messages">
-          <div class="msg bot">
-            <div class="msg-bubble">Hello! I'm the CivicFix AI assistant. I can help you query incident data, check priority breakdowns, or find specific reports. What would you like to know?</div>
-            <div class="msg-time">Now</div>
-          </div>
-        </div>
-        <div class="chat-suggestions">
-          <button class="suggestion" onclick="sendSuggestion(this.textContent)">Show high priority incidents</button>
-          <button class="suggestion" onclick="sendSuggestion(this.textContent)">How many open issues?</button>
-          <button class="suggestion" onclick="sendSuggestion(this.textContent)">What's the top issue type?</button>
-          <button class="suggestion" onclick="sendSuggestion(this.textContent)">Show all Water Leaks</button>
-          <button class="suggestion" onclick="sendSuggestion(this.textContent)">What needs urgent attention?</button>
-        </div>
-        <div class="chat-input-row">
-          <input type="text" class="chat-input" id="chat-input" placeholder="Ask about incidents, priorities, or reports…" onkeydown="if(event.key==='Enter')sendChat()">
-          <button class="chat-send" onclick="sendChat()">Send</button>
-        </div>
-      </div>
-    </div>
-
   </div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
-let allIncidents = [];
-let catChart, statusChart, analCatChart, analPrioChart, analStatusBar;
-
-const COLORS = {
-  Critical: '#e8440a', High: '#e07b00', Medium: '#c9a800', Low: '#2d7a4f'
-};
-const TYPE_ICONS = {
-  'Water Leak':'💧','Pothole':'🚧','Electricity Outage':'⚡',
-  'Waste Collection':'🗑️','Broken Streetlight':'💡','General Issue':'📌'
-};
-
-async function loadAll() {
-  try {
-    const [incRes, statsRes] = await Promise.all([
-      fetch('/api/incidents'), fetch('/api/stats')
-    ]);
-    allIncidents = await incRes.json();
-    const stats = await statsRes.json();
-    renderStats(stats);
-    renderOverviewTable(allIncidents.filter(i=>['High','Critical'].includes(i.priority)));
-    renderIncidentsTable(allIncidents);
-    renderCharts(stats);
-    renderMap(allIncidents);
-    renderAnalytics(stats, allIncidents);
-  } catch(e) {
-    showToast('Failed to load data');
-  }
-}
-
-function renderStats(s) {
-  ['total','open','high_priority','resolved_today'].forEach((k,i) => {
-    const el = document.getElementById(['s-total','s-open','s-high','s-resolved'][i]);
-    if (el) el.textContent = s[k] ?? '—';
-  });
-  document.getElementById('a-total').textContent = s.total;
-  document.getElementById('a-open').textContent  = s.open;
-  document.getElementById('a-high').textContent  = s.high_priority;
-  document.getElementById('a-top').textContent   = s.top_category;
-}
+let catChart, statusChart;
 
 function prioClass(p) {
-  return {'Critical':'b-critical','High':'b-high','Medium':'b-medium','Low':'b-low'}[p]||'b-low';
-}
-function statusClass(s) {
-  return {'Submitted':'b-submitted','Assigned':'b-assigned','In Progress':'b-inprogress','Resolved':'b-resolved'}[s]||'b-submitted';
+  return {'Critical':'b-critical','High':'b-high','Medium':'b-medium','Low':'b-low'}[p] || 'b-low';
 }
 
-function renderOverviewTable(incs) {
-  const tb = document.getElementById('overview-table-body');
-  if (!incs.length) { tb.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">No high/critical incidents</td></tr>'; return; }
-  tb.innerHTML = incs.slice(0,8).map(i=>`
-    <tr>
-      <td><span class="inc-id">${i.id}</span></td>
-      <td>${TYPE_ICONS[i.issue_type]||'📌'} ${i.issue_type}</td>
-      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--muted)">${i.address||'—'}</td>
-      <td><span class="badge ${prioClass(i.priority)}">${i.priority}</span></td>
-      <td><span class="rep-count ${i.report_count>=5?'hot':''}">👥 ${i.report_count}</span></td>
-      <td><span class="badge ${statusClass(i.status)}">${i.status}</span></td>
-    </tr>`).join('');
-}
+async function loadDashboard() {
+  const [statsRes, hotspotsRes, recsRes] = await Promise.all([
+    fetch('/api/stats'),
+    fetch('/api/chronic-hotspots'),
+    fetch('/api/action-recommendations')
+  ]);
 
-function applyFilters() {
-  const statusF = document.getElementById('filter-status').value;
-  const typeF   = document.getElementById('filter-type').value;
-  let filtered = allIncidents;
-  if (statusF) filtered = filtered.filter(i=>i.status===statusF);
-  if (typeF)   filtered = filtered.filter(i=>i.issue_type===typeF);
-  renderIncidentsTable(filtered);
-  document.getElementById('incidents-count').textContent = `${filtered.length} incidents`;
-}
+  const stats = await statsRes.json();
+  const hotspots = await hotspotsRes.json();
+  const recs = await recsRes.json();
 
-function renderIncidentsTable(incs) {
-  const tb = document.getElementById('incidents-table-body');
-  document.getElementById('incidents-count').textContent = `${incs.length} incidents`;
-  if (!incs.length) { tb.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">No incidents found</td></tr>'; return; }
-  tb.innerHTML = incs.map(i=>`
-    <tr>
-      <td><span class="inc-id">${i.id}</span></td>
-      <td>${TYPE_ICONS[i.issue_type]||'📌'} ${i.issue_type}</td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${i.description||'—'}</td>
-      <td style="font-size:12px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i.address||'—'}</td>
-      <td><span class="badge ${prioClass(i.priority)}">${i.priority}</span></td>
-      <td><span class="rep-count ${i.report_count>=5?'hot':''}">👥 ${i.report_count}</span></td>
-      <td><span class="badge ${statusClass(i.status)}">${i.status}</span></td>
-      <td>
-        <select class="status-select" onchange="updateStatus('${i.id}', this.value)">
-          ${['Submitted','Assigned','In Progress','Resolved'].map(s=>`<option ${s===i.status?'selected':''}>${s}</option>`).join('')}
-        </select>
-      </td>
-    </tr>`).join('');
-}
+  document.getElementById('s-total').textContent = stats.total ?? '—';
+  document.getElementById('s-open').textContent = stats.open ?? '—';
+  document.getElementById('s-high').textContent = stats.high_priority ?? '—';
+  document.getElementById('s-resolved').textContent = stats.resolved_today ?? '—';
 
-async function updateStatus(id, status) {
-  try {
-    await fetch(`/api/incidents/${id}/status`, {
-      method: 'PATCH',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({status})
-    });
-    showToast(`${id} → ${status}`);
-    await loadAll();
-  } catch { showToast('Update failed'); }
+  renderCharts(stats);
+  renderHotspots(hotspots);
+  renderRecommendations(recs);
 }
 
 function renderCharts(stats) {
   const cats = stats.by_category || {};
   const statuses = stats.by_status || {};
-  const catLabels = Object.keys(cats);
-  const catVals   = Object.values(cats);
-  const catColors = ['#1a5fa8','#e8440a','#e07b00','#2d7a4f','#c9a800','#7b2fa8'];
 
   if (catChart) catChart.destroy();
   catChart = new Chart(document.getElementById('cat-chart'), {
     type: 'doughnut',
-    data: { labels: catLabels, datasets: [{ data: catVals, backgroundColor: catColors, borderWidth: 0 }] },
-    options: { plugins:{ legend:{position:'right', labels:{font:{family:'DM Sans',size:12},padding:12}} }, cutout:'65%' }
+    data: {
+      labels: Object.keys(cats),
+      datasets: [{
+        data: Object.values(cats),
+        backgroundColor: ['#1a5fa8','#e8440a','#e07b00','#2d7a4f','#c9a800','#7b2fa8'],
+        borderWidth: 0
+      }]
+    },
+    options: { plugins: { legend: { position: 'right' } }, cutout: '65%' }
   });
-
-  const statusLabels = ['Submitted','Assigned','In Progress','Resolved'];
-  const statusVals   = statusLabels.map(s=>statuses[s]||0);
-  const statusColors = ['#2d7a4f','#1a5fa8','#e07b00','#888'];
 
   if (statusChart) statusChart.destroy();
   statusChart = new Chart(document.getElementById('status-chart'), {
     type: 'doughnut',
-    data: { labels: statusLabels, datasets: [{ data: statusVals, backgroundColor: statusColors, borderWidth: 0 }] },
-    options: { plugins:{ legend:{position:'right', labels:{font:{family:'DM Sans',size:12},padding:12}} }, cutout:'65%' }
-  });
-}
-
-function renderAnalytics(stats, incs) {
-  const cats = stats.by_category || {};
-  const statuses = stats.by_status || {};
-
-  if (analCatChart) analCatChart.destroy();
-  analCatChart = new Chart(document.getElementById('anal-cat-chart'), {
-    type: 'bar',
-    data: { labels: Object.keys(cats), datasets: [{ data: Object.values(cats), backgroundColor: '#e8440a', borderRadius: 6 }] },
-    options: { plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{font:{family:'DM Sans',size:11}}, grid:{color:'rgba(0,0,0,.06)'}}, x:{ticks:{font:{family:'DM Sans',size:11}}, grid:{display:false}} } }
-  });
-
-  const prioMap = {Critical:0,High:0,Medium:0,Low:0};
-  incs.forEach(i=>{ if(prioMap[i.priority]!==undefined) prioMap[i.priority]++; });
-
-  if (analPrioChart) analPrioChart.destroy();
-  analPrioChart = new Chart(document.getElementById('anal-prio-chart'), {
-    type: 'doughnut',
     data: {
-      labels: Object.keys(prioMap),
-      datasets: [{ data: Object.values(prioMap), backgroundColor: ['#e8440a','#e07b00','#c9a800','#2d7a4f'], borderWidth: 0 }]
+      labels: ['Submitted','Pending','Resolved'],
+      datasets: [{
+        data: [
+          statuses['Submitted'] || 0,
+          statuses['Pending'] || 0,
+          statuses['Resolved'] || 0
+        ],
+        backgroundColor: ['#2d7a4f','#e07b00','#888'],
+        borderWidth: 0
+      }]
     },
-    options: { plugins:{ legend:{position:'right', labels:{font:{family:'DM Sans',size:12},padding:12}} }, cutout:'60%' }
-  });
-
-  if (analStatusBar) analStatusBar.destroy();
-  analStatusBar = new Chart(document.getElementById('anal-status-bar'), {
-    type: 'bar',
-    data: {
-      labels: ['Submitted','Assigned','In Progress','Resolved'],
-      datasets: [{ data: ['Submitted','Assigned','In Progress','Resolved'].map(s=>statuses[s]||0),
-        backgroundColor: ['#2d7a4f','#1a5fa8','#e07b00','#888'], borderRadius: 6 }]
-    },
-    options: { indexAxis:'y', plugins:{legend:{display:false}}, scales:{ x:{beginAtZero:true, ticks:{font:{family:'DM Sans',size:11}}, grid:{color:'rgba(0,0,0,.06)'}}, y:{ticks:{font:{family:'DM Sans',size:11}}, grid:{display:false}} } }
+    options: { plugins: { legend: { position: 'right' } }, cutout: '65%' }
   });
 }
 
-function renderMap(incs) {
-  const svg = document.getElementById('map-svg');
-  document.getElementById('map-count').textContent = `${incs.length} incidents`;
-
-  // Cape Town bounding box → pixel space
-  const minLat=-33.96, maxLat=-33.90, minLon=18.39, maxLon=18.50;
-  function toXY(lat, lon) {
-    const x = ((lon-minLon)/(maxLon-minLon)) * 720 + 40;
-    const y = ((maxLat-lat)/(maxLat-minLat)) * 340 + 30;
-    return [x, y];
+function renderHotspots(items) {
+  const el = document.getElementById('hotspots-list');
+  if (!items.length) {
+    el.innerHTML = '<p style="color:#6b6860">No chronic hotspots flagged yet.</p>';
+    return;
   }
 
-  // Background grid lines
-  let html = `
-    <rect width="800" height="400" fill="#e8e4dc"/>
-    <line x1="0" y1="200" x2="800" y2="200" stroke="#d4d0c8" stroke-width="0.5"/>
-    <line x1="400" y1="0" x2="400" y2="400" stroke="#d4d0c8" stroke-width="0.5"/>
-    <text x="12" y="20" font-family="DM Sans" font-size="11" fill="#aaa">Cape Town</text>
-  `;
-
-  const colorMap = { Critical:'#e8440a', High:'#e07b00', Medium:'#c9a800', Low:'#2d7a4f' };
-
-  incs.forEach(inc => {
-    if (!inc.lat || !inc.lon) return;
-    const [x, y] = toXY(inc.lat, inc.lon);
-    const r = Math.min(6 + inc.report_count * 2, 24);
-    const color = colorMap[inc.priority] || '#888';
-    html += `
-      <circle cx="${x}" cy="${y}" r="${r+4}" fill="${color}" opacity="0.15"/>
-      <circle cx="${x}" cy="${y}" r="${r}" fill="${color}" opacity="0.85" stroke="#fff" stroke-width="1.5">
-        <title>${inc.id}: ${inc.issue_type} — ${inc.priority} (${inc.report_count} reports)</title>
-      </circle>
-      <text x="${x}" y="${y+4}" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#fff" font-weight="600">${inc.report_count}</text>
-    `;
-  });
-
-  svg.innerHTML = html;
+  el.innerHTML = items.map(h => `
+    <div class="hotspot">
+      <strong>${h.issue_type} in ${h.ward}</strong>
+      <p>${h.incident_count} open incidents, ${h.total_reports} total reports</p>
+      <p>Examples: ${(h.sample_addresses || []).join(', ')}</p>
+      <span class="badge ${prioClass(h.max_priority)}">${h.max_priority}</span>
+    </div>
+  `).join('');
 }
 
-// CHATBOT
-function buildChatResponse(query, incs, stats) {
-  const q = query.toLowerCase();
-  if (q.includes('high priority') || q.includes('urgent') || q.includes('critical')) {
-    const hi = incs.filter(i=>['High','Critical'].includes(i.priority));
-    if (!hi.length) return 'There are currently no high or critical priority incidents. All good!';
-    return `There are **${hi.length}** high/critical incidents:\n${hi.slice(0,5).map(i=>`• ${i.id} — ${i.issue_type} (${i.priority}) — ${i.status}`).join('\n')}`;
+function renderRecommendations(items) {
+  const el = document.getElementById('recommendations-list');
+  if (!items.length) {
+    el.innerHTML = '<p style="color:#6b6860">No recommendations yet.</p>';
+    return;
   }
-  if (q.includes('open') || q.includes('how many')) {
-    return `Currently there are **${stats.open}** open incidents out of ${stats.total} total. ${stats.high_priority} are high or critical priority.`;
-  }
-  if (q.includes('water leak') || q.includes('water')) {
-    const wl = incs.filter(i=>i.issue_type==='Water Leak');
-    return `There are **${wl.length}** water leak incidents. ${wl.filter(i=>i.status!=='Resolved').length} are still open.`;
-  }
-  if (q.includes('pothole')) {
-    const ph = incs.filter(i=>i.issue_type==='Pothole');
-    return `**${ph.length}** pothole incidents on record. ${ph.filter(i=>i.status!=='Resolved').length} unresolved.`;
-  }
-  if (q.includes('top') || q.includes('most common')) {
-    return `The most common issue type is **${stats.top_category}**. Category breakdown: ${Object.entries(stats.by_category||{}).map(([k,v])=>`${k}: ${v}`).join(', ')}.`;
-  }
-  if (q.includes('resolved')) {
-    return `**${stats.resolved_today}** incidents were resolved today. Total resolved: ${stats.by_status?.Resolved||0}.`;
-  }
-  if (q.includes('attention') || q.includes('action')) {
-    const crit = incs.filter(i=>i.priority==='Critical'&&i.status!=='Resolved');
-    if (!crit.length) return 'No critical unresolved incidents right now. Check high priority items on the dashboard.';
-    return `**Urgent attention needed:**\n${crit.map(i=>`• ${i.id}: ${i.issue_type} at ${i.address} — ${i.report_count} reports`).join('\n')}`;
-  }
-  return `I found **${incs.length}** total incidents in the system. You can ask me about high priority incidents, water leaks, potholes, open issues, or what needs urgent attention. I can also summarise by category or status.`;
+
+  el.innerHTML = items.map(r => `
+    <div class="rec">
+      <strong>${r.title}</strong>
+      <p>${r.reason}</p>
+      <span class="badge ${prioClass(r.priority)}">${r.priority}</span>
+    </div>
+  `).join('');
 }
 
-let chatStats = {};
-function sendSuggestion(text) { document.getElementById('chat-input').value = text; sendChat(); }
-async function sendChat() {
-  const input = document.getElementById('chat-input');
-  const q = input.value.trim(); if (!q) return;
-  addMsg(q, 'user'); input.value = '';
-  const typing = addTyping();
-  await new Promise(r=>setTimeout(r, 600 + Math.random()*400));
-  typing.remove();
-  const response = buildChatResponse(q, allIncidents, chatStats);
-  addMsg(response.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>'), 'bot', true);
-}
-function addMsg(text, role, html=false) {
-  const wrap = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = `msg ${role}`;
-  div.innerHTML = `<div class="msg-bubble">${html?text:escHtml(text)}</div><div class="msg-time">${new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div>`;
-  wrap.appendChild(div);
-  wrap.scrollTop = wrap.scrollHeight;
-  return div;
-}
-function addTyping() {
-  const wrap = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = 'msg bot';
-  div.innerHTML = '<div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>';
-  wrap.appendChild(div);
-  wrap.scrollTop = wrap.scrollHeight;
-  return div;
-}
-function escHtml(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function showPanel(name) {
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('panel-'+name).classList.add('active');
-  const titles = {overview:'Dashboard overview',incidents:'All incidents',map:'Map view',analytics:'Analytics',chatbot:'AI Assistant'};
-  document.getElementById('topbar-title').textContent = titles[name]||name;
-  event.currentTarget.classList.add('active');
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 2800);
-}
-
-// Init
-loadAll().then(()=>{
-  fetch('/api/stats').then(r=>r.json()).then(s=>chatStats=s);
-});
+loadDashboard();
 </script>
 </body>
 </html>

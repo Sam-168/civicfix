@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Incidents — CivicFix AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0a0a0a;--paper:#f5f2eb;--accent:#e8440a;--muted:#6b6860;--card:#fff;--border:#ddd9d0;--sidebar:#0d0d0d;--sidebar-text:#aaa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);display:flex;min-height:100vh}
+.sidebar{width:220px;flex-shrink:0;background:var(--sidebar);display:flex;flex-direction:column;padding:28px 0;position:fixed;top:0;left:0;bottom:0}
+.sidebar-logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff;padding:0 24px 32px;border-bottom:1px solid #222}
+.sidebar-logo span{color:var(--accent)}
+.sidebar-nav{flex:1;padding:20px 0}
+.nav-label{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#555;padding:0 24px 10px;display:block}
+.nav-item{display:flex;align-items:center;gap:10px;padding:12px 24px;font-size:14px;font-weight:500;color:var(--sidebar-text);text-decoration:none}
+.nav-item:hover,.nav-item.active{color:#fff;background:#1a1a1a;border-left:2px solid var(--accent)}
+.sidebar-bottom{padding:20px 24px;border-top:1px solid #222}
+.btn-logout{display:block;padding:12px 16px;border-radius:8px;background:#fff;color:#111;text-align:center;text-decoration:none;font-family:'Syne',sans-serif;font-size:13px;font-weight:700}
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:18px 36px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.topbar-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700}
+.filters{display:flex;gap:10px;flex-wrap:wrap}
+select{padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:#faf7f0}
+.content{padding:36px}
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--paper)}
+th{padding:12px 16px;font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);text-align:left;border-bottom:1px solid var(--border)}
+td{padding:14px 16px;font-size:14px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:100px;font-size:12px;font-weight:600}
+.b-critical{background:#fde8e2;color:#c0320a}
+.b-high{background:#fef3e2;color:#b05f00}
+.b-medium{background:#fefce2;color:#8a7000}
+.b-low{background:#e8f5ee;color:#1e6640}
+.b-submitted{background:#e8f5ee;color:#1e6640}
+.b-pending{background:#fef3e2;color:#b05f00}
+.b-resolved{background:#f0f0f0;color:#555}
+.inc-id{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--accent)}
+.status-select{padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:#faf7f0}
+@media (max-width:860px){body{display:block}.sidebar{position:relative;width:100%}.main{margin-left:0}.content{padding:20px}}
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo">Civic<span>Fix</span> AI</div>
+    <nav class="sidebar-nav">
+      <span class="nav-label">Admin</span>
+      <a class="nav-item" href="/dashboard">Dashboard</a>
+      <a class="nav-item active" href="/incidents">Incidents</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">Incidents</div>
+      <div class="filters">
+        <select id="filter-status" onchange="applyFilters()">
+          <option value="">All statuses</option>
+          <option value="Submitted">Submitted</option>
+          <option value="Pending">Pending</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+        <select id="filter-type" onchange="applyFilters()">
+          <option value="">All types</option>
+          <option value="Water Leak">Water Leak</option>
+          <option value="Pothole">Pothole</option>
+          <option value="Electricity Outage">Electricity Outage</option>
+          <option value="Waste Collection">Waste Collection</option>
+          <option value="Broken Streetlight">Broken Streetlight</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Type</th>
+              <th>Description</th>
+              <th>Location</th>
+              <th>Priority</th>
+              <th>Reports</th>
+              <th>Status</th>
+              <th>AI</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="incidents-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script>
+let allIncidents = [];
+
+function prioClass(p) {
+  return {'Critical':'b-critical','High':'b-high','Medium':'b-medium','Low':'b-low'}[p] || 'b-low';
+}
+function statusClass(s) {
+  return {'Submitted':'b-submitted','Pending':'b-pending','Resolved':'b-resolved'}[s] || 'b-submitted';
+}
+const TYPE_ICONS = {
+  'Water Leak':'💧',
+  'Pothole':'🚧',
+  'Electricity Outage':'⚡',
+  'Waste Collection':'🗑️',
+  'Broken Streetlight':'💡',
+  'General Issue':'📌'
+};
+
+async function loadIncidents() {
+  const res = await fetch('/api/incidents');
+  allIncidents = await res.json();
+  renderIncidents(allIncidents);
+}
+
+function applyFilters() {
+  const statusF = document.getElementById('filter-status').value;
+  const typeF = document.getElementById('filter-type').value;
+
+  let filtered = allIncidents;
+  if (statusF) filtered = filtered.filter(i => i.status === statusF);
+  if (typeF) filtered = filtered.filter(i => i.issue_type === typeF);
+
+  renderIncidents(filtered);
+}
+
+function renderIncidents(incs) {
+  const tb = document.getElementById('incidents-table-body');
+
+  if (!incs.length) {
+    tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#6b6860;padding:24px">No incidents found</td></tr>';
+    return;
+  }
+
+  tb.innerHTML = incs.map(i => `
+    <tr>
+      <td><span class="inc-id">${i.id}</span></td>
+      <td>${TYPE_ICONS[i.issue_type] || '📌'} ${i.issue_type}</td>
+      <td>${i.description || '—'}</td>
+      <td>${i.address || '—'}</td>
+      <td><span class="badge ${prioClass(i.priority)}">${i.priority}</span></td>
+      <td>${i.report_count || 0}</td>
+      <td><span class="badge ${statusClass(i.status)}">${i.status}</span></td>
+      <td>${i.classification_source || 'rules'}</td>
+      <td>
+        <select class="status-select" onchange="updateStatus('${i.id}', this.value)">
+          ${['Submitted','Pending','Resolved'].map(s => `<option ${s===i.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function updateStatus(id, status) {
+  await fetch(`/api/incidents/${id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status })
+  });
+  loadIncidents();
+}
+
+loadIncidents();
+</script>
+</body>
+</html>
