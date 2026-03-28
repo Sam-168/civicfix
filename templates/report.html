@@ -7,7 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#0a0a0a;--paper:#f5f2eb;--card:#fff;--border:#ddd9d0;--accent:#e8440a;--muted:#6b6860;--sidebar:#0d0d0d}
+:root{
+  --ink:#0a0a0a; --paper:#f5f2eb; --card:#fff; --border:#ddd9d0;
+  --accent:#e8440a; --muted:#6b6860; --sidebar:#0d0d0d;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);display:flex;min-height:100vh}
 .sidebar{width:220px;background:var(--sidebar);color:#fff;padding:28px 0;display:flex;flex-direction:column}
@@ -64,20 +67,23 @@ textarea{min-height:140px;resize:vertical}
         Describe the problem, detect your location, upload a photo if available, and submit the issue for municipal action.
       </p>
 
-      <div class="form-card">
-        <label for="description">Describe the problem</label>
+      <form id="report-form" class="form-card">
+        <label for="description">Describe the problem (optional if image is uploaded)</label>
         <textarea id="description" placeholder="Example: Burst pipe flooding the road near the primary school on Main Street. Water has been flowing for about 2 hours."></textarea>
 
         <label for="address">Location</label>
         <div class="row">
           <input id="address" type="text" placeholder="Address will appear here after detection..." readonly>
-          <button class="btn secondary" type="button" onclick="detectLocation()">Detect</button>
+          <button class="btn secondary" type="button" onclick="getLocation()">Detect</button>
         </div>
+
+        <input type="hidden" id="lat">
+        <input type="hidden" id="lon">
 
         <div class="loc-box">
           <div class="meta">
             <strong style="display:block;margin-bottom:8px;color:#111">Live location</strong>
-            <div id="loc-text">Location not detected yet.</div>
+            <div id="location-status">Location not detected yet.</div>
           </div>
         </div>
 
@@ -92,20 +98,21 @@ textarea{min-height:140px;resize:vertical}
         <div id="error" class="error"></div>
 
         <div style="margin-top:18px">
-          <button class="btn" type="button" onclick="submitReport()">Submit Report</button>
+          <button class="btn" id="submit-btn" type="submit">
+            <span id="spinner" style="display:none;margin-right:8px">⏳</span>
+            <span id="submit-text">Submit Report →</span>
+          </button>
         </div>
+      </form>
 
-        <div id="result" class="result">
-          <strong>Report submitted</strong>
-          <div class="meta" id="result-text"></div>
-        </div>
+      <div id="result" class="result" style="margin-top:20px">
+        <strong>Report submitted</strong>
+        <div class="meta" id="result-text"></div>
       </div>
     </div>
   </main>
 
 <script>
-let currentLat = null;
-let currentLon = null;
 let uploadedImageBase64 = null;
 
 function showError(msg) {
@@ -120,36 +127,37 @@ function clearError() {
   el.style.display = 'none';
 }
 
-function detectLocation() {
-  clearError();
+function getLocation() {
+  const status = document.getElementById('location-status');
+  status.textContent = 'Detecting your location…';
 
   if (!navigator.geolocation) {
-    showError('Geolocation is not supported on this browser.');
+    status.textContent = 'Geolocation not supported. Enter address manually.';
+    document.getElementById('address').readOnly = false;
     return;
   }
 
-  document.getElementById('loc-text').textContent = 'Detecting location...';
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+    document.getElementById('lat').value = lat;
+    document.getElementById('lon').value = lon;
 
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      currentLat = pos.coords.latitude;
-      currentLon = pos.coords.longitude;
-      document.getElementById('loc-text').textContent = `Lat ${currentLat.toFixed(5)} | Lon ${currentLon.toFixed(5)}`;
-
-      try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${currentLat}&lon=${currentLon}`);
-        const data = await res.json();
-        document.getElementById('address').value = data.display_name || 'Address detected';
-      } catch {
-        document.getElementById('address').value = 'Address unavailable';
-      }
-    },
-    () => {
-      showError('Could not detect your location. Please allow location access.');
-      document.getElementById('loc-text').textContent = 'Location not detected.';
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`)
+      .then(r => r.json())
+      .then(data => {
+        const addr = data.display_name || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+        document.getElementById('address').value = addr;
+        status.textContent = `✓ Location captured: ${addr}`;
+      })
+      .catch(() => {
+        document.getElementById('address').value = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+        status.textContent = '✓ Coordinates captured';
+      });
+  }, () => {
+    status.textContent = 'Could not get location. You can enter the address manually.';
+    document.getElementById('address').readOnly = false;
+  });
 }
 
 function previewImage(input) {
@@ -164,42 +172,48 @@ function previewImage(input) {
   }
 }
 
-async function submitReport() {
+document.getElementById('report-form').addEventListener('submit', async e => {
+  e.preventDefault();
+
   clearError();
 
-  const description = document.getElementById('description').value.trim();
-  const address = document.getElementById('address').value.trim() || 'Unknown location';
+  const desc = document.getElementById('description').value.trim();
+  const hasImage = !!uploadedImageBase64;
 
-  if (!description) {
-    showError('Please describe the problem.');
+  if (!desc && !hasImage) {
+    showError('Please add a description or upload a photo.');
     return;
   }
 
-  if (currentLat === null || currentLon === null) {
-    showError('Please detect your location before submitting.');
-    return;
-  }
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  document.getElementById('spinner').style.display = 'inline';
+  document.getElementById('submit-text').textContent = 'Analysing…';
 
-  const payload = {
-    description,
-    lat: currentLat,
-    lon: currentLon,
-    address,
-    ward: 'Unknown',
-    image_base64: uploadedImageBase64
-  };
+  const lat = parseFloat(document.getElementById('lat').value) || -33.9249 + (Math.random() - .5) * .02;
+  const lon = parseFloat(document.getElementById('lon').value) || 18.4241 + (Math.random() - .5) * .02;
+  const address = document.getElementById('address').value || 'Cape Town, South Africa';
 
   try {
-    const res = await fetch('/api/submit', {
+    const resp = await fetch('/api/submit', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        description: desc,
+        image_base64: uploadedImageBase64,
+        lat,
+        lon,
+        address
+      })
     });
 
-    const data = await res.json();
+    const data = await resp.json();
 
-    if (!res.ok) {
-      showError(data.error || 'Failed to submit report.');
+    if (!resp.ok) {
+      showError(data.error || 'Submission failed.');
+      btn.disabled = false;
+      document.getElementById('spinner').style.display = 'none';
+      document.getElementById('submit-text').textContent = 'Submit Report →';
       return;
     }
 
@@ -212,16 +226,28 @@ async function submitReport() {
       <div><b>Department:</b> ${data.department}</div>
       <div><b>Priority:</b> ${data.priority}</div>
       <div><b>Status:</b> ${data.status}</div>
-      <div><b>AI source:</b> ${data.ai_source}</div>
+      <div><b>AI source:</b> ${data.ai_source || 'rules'}</div>
+      <div><b>Summary:</b> ${data.summary || 'No summary available.'}</div>
       <div><b>Message:</b> ${data.reason}</div>
     `;
+
     result.classList.add('show');
 
     document.getElementById('description').value = '';
-  } catch {
-    showError('Something went wrong while submitting the report.');
+    uploadedImageBase64 = null;
+    document.getElementById('photo').value = '';
+    document.getElementById('preview-wrap').style.display = 'none';
+
+    btn.disabled = false;
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('submit-text').textContent = 'Submit Report →';
+  } catch(err) {
+    showError('Submission failed. Please check your connection and try again.');
+    btn.disabled = false;
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('submit-text').textContent = 'Submit Report →';
   }
-}
+});
 </script>
 </body>
 </html>

@@ -164,6 +164,22 @@
       "created_at": "2026-03-27T23:03:36.350179Z",
       "updated_at": "2026-03-28T05:47:18.758982Z",
       "ward": "Unknown"
+    },
+    {
+      "id": "INC-111",
+      "issue_type": "General Issue",
+      "department": "General Services",
+      "priority": "Low",
+      "description": "general municipal issue reported from uploaded image",
+      "lat": -33.91915600292905,
+      "lon": 18.417524893913445,
+      "address": "Cape Town, South Africa",
+      "status": "Submitted",
+      "report_count": 1,
+      "created_at": "2026-03-28T08:10:07.947407Z",
+      "updated_at": "2026-03-28T08:10:07.947442Z",
+      "ward": "Unknown",
+      "classification_source": "rules"
     }
   ],
   "reports": [
@@ -258,6 +274,17 @@
       "address": "Boompies Street, Cape Town Ward 10, Parow, City of Cape Town, Western Cape, 7505, South Africa",
       "submitted_at": "2026-03-28T05:47:18.758995Z",
       "is_duplicate": true,
+      "submitted_by": "avuzwa091@gmail.com"
+    },
+    {
+      "id": "RPT-816A08",
+      "incident_id": "INC-111",
+      "description": "general municipal issue reported from uploaded image",
+      "lat": -33.91915600292905,
+      "lon": 18.417524893913445,
+      "address": "Cape Town, South Africa",
+      "submitted_at": "2026-03-28T08:10:07.947457Z",
+      "is_duplicate": false,
       "submitted_by": "avuzwa091@gmail.com"
     }
   ]

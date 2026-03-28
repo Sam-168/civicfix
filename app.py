@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 from flask_cors import CORS
-from functools import wraps
 from dotenv import load_dotenv
 from openai import OpenAI
+from functools import wraps
 import json, uuid, math, datetime, os
 from pathlib import Path
 
@@ -15,6 +15,7 @@ CORS(app)
 DATA_FILE = Path("data/incidents.json")
 DATA_FILE.parent.mkdir(exist_ok=True)
 
+
 # ─────────────────────────────────────────────────────────────
 # CONFIG
 # ─────────────────────────────────────────────────────────────
@@ -22,6 +23,7 @@ DATA_FILE.parent.mkdir(exist_ok=True)
 def get_admin_emails():
     raw = os.getenv("ADMIN_EMAILS", "")
     return {e.strip().lower() for e in raw.split(",") if e.strip()}
+
 
 # ─────────────────────────────────────────────────────────────
 # HELPERS
@@ -66,6 +68,7 @@ def login_required(role=None):
             return fn(*args, **kwargs)
         return wrapper
     return decorator
+
 
 # ─────────────────────────────────────────────────────────────
 # RULE-BASED CLASSIFICATION
@@ -113,12 +116,14 @@ def classify_rules(description):
         priority = "Medium"
 
     return {
+        "summary": description.strip() if description else "Municipal issue detected from uploaded image.",
         "issue_type": issue_type,
         "department": DEPT_MAP.get(issue_type, "General Services"),
         "priority": priority,
         "reason": "Classified using rule-based keyword matching.",
         "source": "rules"
     }
+
 
 # ─────────────────────────────────────────────────────────────
 # OPENAI + FALLBACK
@@ -139,7 +144,7 @@ def classify_openai(description, image_base64=None):
 You are classifying a municipal service issue.
 
 Return strict JSON with:
-issue_type, department, priority, reason
+summary, issue_type, department, priority, reason
 
 Allowed issue_type values:
 Water Leak, Pothole, Electricity Outage, Waste Collection, Broken Streetlight, General Issue
@@ -149,6 +154,10 @@ Water & Sanitation, Roads & Transport, Electricity Department, Waste Management,
 
 Allowed priority values:
 Low, Medium, High, Critical
+
+If the description is empty, infer from the image.
+If both are present, use both.
+Keep summary short and practical.
 
 User description:
 {description}
@@ -171,20 +180,25 @@ User description:
         parsed = json.loads(response.choices[0].message.content)
 
         return {
+            "summary": parsed.get("summary", "").strip() or "Municipal issue detected from uploaded image.",
             "issue_type": parsed.get("issue_type", "General Issue"),
             "department": parsed.get("department", "General Services"),
             "priority": parsed.get("priority", "Medium"),
             "reason": parsed.get("reason", "AI-assisted classification."),
             "source": "openai"
         }
-    except Exception:
+    except Exception as e:
+        print("OpenAI classification failed:", e)
         return None
 
 def classify_issue(description, image_base64=None):
     ai = classify_openai(description, image_base64)
     if ai:
         return ai
-    return classify_rules(description)
+
+    fallback_text = description.strip() if description else "general municipal issue reported from uploaded image"
+    return classify_rules(fallback_text)
+
 
 # ─────────────────────────────────────────────────────────────
 # DUPLICATE / HOTSPOT LOGIC
@@ -271,6 +285,7 @@ def build_action_recommendations(data):
 
     return recommendations[:5]
 
+
 # ─────────────────────────────────────────────────────────────
 # DEMO SEED
 # ─────────────────────────────────────────────────────────────
@@ -290,6 +305,7 @@ DEMO_INCIDENTS = [
         "created_at": "2025-03-25T07:30:00Z",
         "updated_at": "2025-03-25T09:00:00Z",
         "ward": "Ward 57",
+        "classification_source": "rules"
     },
     {
         "id": "INC-002",
@@ -305,6 +321,7 @@ DEMO_INCIDENTS = [
         "created_at": "2025-03-25T08:10:00Z",
         "updated_at": "2025-03-25T08:45:00Z",
         "ward": "Ward 58",
+        "classification_source": "rules"
     },
     {
         "id": "INC-003",
@@ -320,6 +337,7 @@ DEMO_INCIDENTS = [
         "created_at": "2025-03-25T19:00:00Z",
         "updated_at": "2025-03-25T19:00:00Z",
         "ward": "Ward 77",
+        "classification_source": "rules"
     },
     {
         "id": "INC-004",
@@ -335,6 +353,7 @@ DEMO_INCIDENTS = [
         "created_at": "2025-03-26T06:00:00Z",
         "updated_at": "2025-03-26T06:30:00Z",
         "ward": "Ward 59",
+        "classification_source": "rules"
     },
     {
         "id": "INC-005",
@@ -350,6 +369,7 @@ DEMO_INCIDENTS = [
         "created_at": "2025-03-26T10:00:00Z",
         "updated_at": "2025-03-26T10:00:00Z",
         "ward": "Ward 77",
+        "classification_source": "rules"
     },
 ]
 
@@ -359,6 +379,7 @@ def ensure_seed():
         data["incidents"] = DEMO_INCIDENTS
         data["reports"] = []
         save_data(data)
+
 
 # ─────────────────────────────────────────────────────────────
 # AUTH
@@ -400,6 +421,7 @@ def logout():
     session.clear()
     return redirect(url_for("index"))
 
+
 # ─────────────────────────────────────────────────────────────
 # PAGES
 # ─────────────────────────────────────────────────────────────
@@ -429,6 +451,7 @@ def dashboard_page():
 def incidents_page():
     return render_template("incidents.html", user=current_user())
 
+
 # ─────────────────────────────────────────────────────────────
 # USER API
 # ─────────────────────────────────────────────────────────────
@@ -443,12 +466,13 @@ def submit_report():
     addr = body.get("address", "Unknown location")
     image_base64 = body.get("image_base64")
 
-    if not description:
-        return jsonify({"error": "Description required"}), 400
+    if not description and not image_base64:
+        return jsonify({"error": "Please provide a description or upload a photo."}), 400
 
     ai = classify_issue(description, image_base64)
-    data = load_data()
+    final_description = description if description else ai.get("summary", "Municipal issue detected from uploaded image.")
 
+    data = load_data()
     existing = find_duplicate(data, ai["issue_type"], lat, lon)
     report_id = "RPT-" + uuid.uuid4().hex[:6].upper()
 
@@ -464,7 +488,7 @@ def submit_report():
         report = {
             "id": report_id,
             "incident_id": existing["id"],
-            "description": description,
+            "description": final_description,
             "lat": lat,
             "lon": lon,
             "address": addr,
@@ -472,6 +496,7 @@ def submit_report():
             "is_duplicate": True,
             "submitted_by": session.get("email"),
         }
+
         data["reports"].append(report)
         save_data(data)
 
@@ -485,16 +510,18 @@ def submit_report():
             "status": existing["status"],
             "reason": "Your report has been linked to an existing incident in your area.",
             "report_count": existing["report_count"],
+            "summary": final_description,
             "ai_source": ai.get("source", "rules")
         })
 
     inc_id = "INC-" + str(100 + len(data["incidents"])).zfill(3)
+
     incident = {
         "id": inc_id,
         "issue_type": ai["issue_type"],
         "department": ai["department"],
         "priority": ai["priority"],
-        "description": description,
+        "description": final_description,
         "lat": lat,
         "lon": lon,
         "address": addr,
@@ -509,7 +536,7 @@ def submit_report():
     report = {
         "id": report_id,
         "incident_id": inc_id,
-        "description": description,
+        "description": final_description,
         "lat": lat,
         "lon": lon,
         "address": addr,
@@ -532,6 +559,7 @@ def submit_report():
         "status": "Submitted",
         "reason": ai["reason"],
         "report_count": 1,
+        "summary": final_description,
         "ai_source": ai.get("source", "rules")
     })
 
@@ -559,6 +587,7 @@ def my_reports():
 
     enriched.sort(key=lambda x: x["submitted_at"], reverse=True)
     return jsonify(enriched)
+
 
 # ─────────────────────────────────────────────────────────────
 # ADMIN API
@@ -604,7 +633,8 @@ def get_stats():
     high = sum(1 for i in incs if i["priority"] in ("High", "Critical"))
     resolved_today = sum(
         1 for i in incs
-        if i["status"] == "Resolved" and i.get("updated_at", "")[:10] == datetime.date.today().isoformat()
+        if i["status"] == "Resolved"
+        and i.get("updated_at", "")[:10] == datetime.date.today().isoformat()
     )
 
     cats = {}
@@ -638,6 +668,7 @@ def chronic_hotspots():
 def action_recommendations():
     data = load_data()
     return jsonify(build_action_recommendations(data))
+
 
 if __name__ == "__main__":
     ensure_seed()
