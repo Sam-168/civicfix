@@ -12,8 +12,18 @@ app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "civicfix-super-secret-key")
 CORS(app)
 
-DATA_FILE = Path("data/incidents.json")
-DATA_FILE.parent.mkdir(exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parent
+SEED_DATA_FILE = PROJECT_ROOT / "data" / "incidents.json"
+
+# Vercel Functions have a read-only project filesystem. Keep demo writes in
+# their writable scratch directory while retaining file-backed storage locally.
+default_data_file = (
+    "/tmp/civicfix/incidents.json"
+    if os.getenv("VERCEL")
+    else str(SEED_DATA_FILE)
+)
+DATA_FILE = Path(os.getenv("DATA_FILE", default_data_file))
+DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -32,6 +42,8 @@ def get_admin_emails():
 def load_data():
     if DATA_FILE.exists():
         return json.loads(DATA_FILE.read_text())
+    if SEED_DATA_FILE.exists():
+        return json.loads(SEED_DATA_FILE.read_text())
     return {"incidents": [], "reports": []}
 
 def save_data(data):
